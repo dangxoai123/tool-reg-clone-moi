@@ -1182,7 +1182,7 @@ class ModernVerifyApp(ctk.CTk):
                     self.log(f"[Luồng {worker_id}] UID {uid}: [CẤP MAIL THÀNH CÔNG] Email: {mail_addr}")
                     self.after(0, lambda i=idx: self.update_row_status(i, f"Đã có Mail: {mail_addr[:15]}...", "#a855f7"))
 
-                    delay_step = 1.0
+                    delay_step = round(random.uniform(1.0, 3.0), 1)
                     self.log(f"[Luồng {worker_id}] UID {uid}: Chờ {delay_step:.1f}s trước khi gửi Email lên Facebook...")
                     time.sleep(delay_step)
 
@@ -1199,7 +1199,7 @@ class ModernVerifyApp(ctk.CTk):
                         continue
 
                     # 6. Khởi tạo màn hình chờ OTP
-                    delay_otp_screen = 1.0
+                    delay_otp_screen = round(random.uniform(1.0, 3.0), 1)
                     self.log(f"[Luồng {worker_id}] UID {uid}: Chờ {delay_otp_screen:.1f}s trước khi mở màn hình OTP...")
                     time.sleep(delay_otp_screen)
                     if not verifier.prepare_otp_screen():
@@ -1289,7 +1289,7 @@ class ModernVerifyApp(ctk.CTk):
                     self.log(f"[Luồng {worker_id}] UID {uid}: [THUÊ SỐ THÀNH CÔNG] SĐT: {phone} (Order: {order_id})")
                     self.after(0, lambda i=idx: self.update_row_status(i, f"Đã có SĐT: {phone}", "#a855f7"))
                     
-                    delay_phone = 1.0
+                    delay_phone = round(random.uniform(1.0, 3.0), 1)
                     self.log(f"[Luồng {worker_id}] UID {uid}: Chờ {delay_phone:.1f}s trước khi gửi SĐT lên Facebook...")
                     time.sleep(delay_phone)
 
@@ -1306,7 +1306,7 @@ class ModernVerifyApp(ctk.CTk):
                         continue
 
                     # 6. Khởi tạo màn hình chờ OTP
-                    delay_otp_screen = 1.0
+                    delay_otp_screen = round(random.uniform(1.0, 3.0), 1)
                     self.log(f"[Luồng {worker_id}] UID {uid}: Chờ {delay_otp_screen:.1f}s trước khi mở màn hình OTP...")
                     time.sleep(delay_otp_screen)
                     if not verifier.prepare_otp_screen():
@@ -1340,8 +1340,8 @@ class ModernVerifyApp(ctk.CTk):
                 self.log(f"[Luồng {worker_id}] UID {uid}: [ĐÃ BẮT ĐƯỢC MÃ OTP] ==> {otp_code} <==")
                 self.after(0, lambda i=idx: self.update_row_status(i, f"OTP: {otp_code}", "#10b981"))
 
-                # Nhịp trễ trước khi submit OTP (1s)
-                delay_otp_submit = 1.0
+                # Nhịp trễ trước khi submit OTP (Random 1-3s)
+                delay_otp_submit = round(random.uniform(1.0, 3.0), 1)
                 self.log(f"[Luồng {worker_id}] UID {uid}: Chờ {delay_otp_submit:.1f}s trước khi nhập mã OTP...")
                 time.sleep(delay_otp_submit)
 
@@ -1350,7 +1350,7 @@ class ModernVerifyApp(ctk.CTk):
                 success = verifier.submit_otp(otp_code)
                 if success:
                     all_cookies = verifier.get_cookie_string()
-                    delay_warmup = 1.0
+                    delay_warmup = round(random.uniform(1.0, 3.0), 1)
                     self.log(f"[Luồng {worker_id}] UID {uid}: [SUCCESS] Xác minh thành công! Đang ngâm phiên {delay_warmup:.1f}s...")
                     time.sleep(delay_warmup)
 
@@ -1398,15 +1398,15 @@ class ModernVerifyApp(ctk.CTk):
                     self.after(0, lambda i=idx, pl=post_live, st=final_status: self.update_row_status(i, f"Hoàn tất [{st}]", "#10b981" if pl else "#ef4444"))
                     self.after(0, self.update_stats)
                 else:
-                    self.log(f"[Luồng {worker_id}] UID {uid}: Submit OTP thất bại (Có thể mã hết hạn) -> Đã lưu vào die.txt")
-                    self.die_count += 1
-                    acc["live_status"] = "DIE"
+                    self.log(f"[Luồng {worker_id}] UID {uid}: Submit OTP không khớp (Mã sai hoặc hết hạn) -> Đã lưu vào sai_otp.txt")
+                    self.error_count += 1
+                    acc["live_status"] = "SAI_OTP"
                     save_account_result(
                         uid=uid,
                         pwd=acc.get("pwd", ""),
                         new_phone=contact_val,
                         cookie=cookie,
-                        status="DIE",
+                        status="SAI_OTP",
                         raw_line=acc.get("raw_line")
                     )
                     current_acc_path = getattr(self, "current_acc_file", "novery_chrome.txt")
@@ -1414,8 +1414,8 @@ class ModernVerifyApp(ctk.CTk):
                         remove_account_from_novery(acc["raw_line"], current_acc_path)
                         if os.path.exists("novery.txt") and current_acc_path != "novery.txt":
                             remove_account_from_novery(acc["raw_line"], "novery.txt")
-                    self.after(0, lambda i=idx: self.update_row_live(i, "DIE"))
-                    self.after(0, lambda i=idx: self.update_row_status(i, "Sai OTP (DIE)", "#ef4444"))
+                    self.after(0, lambda i=idx: self.update_row_live(i, "SAI OTP"))
+                    self.after(0, lambda i=idx: self.update_row_status(i, "Sai OTP", "#f59e0b"))
                     self.after(0, self.update_stats)
 
             except Exception as e:

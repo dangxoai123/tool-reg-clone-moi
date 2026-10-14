@@ -1304,6 +1304,13 @@ def save_account_result(uid: str, pwd: str, new_phone: str, cookie: str, status:
         phone_part = f"||{new_phone}" if new_phone else ""
         line = f"{uid}|{pwd}|{cookie}{phone_part}\n"
         target_file = "live.txt"
+    elif status == "SAI_OTP":
+        if raw_line and raw_line.strip():
+            line = raw_line.strip() + "\n"
+        else:
+            phone_part = f"||{new_phone}" if new_phone else ""
+            line = f"{uid}|{pwd}|{cookie}{phone_part}\n"
+        target_file = "sai_otp.txt"
     else:
         # BỎ HOÀN TOÀN TRẠNG THÁI LỖI THEO YÊU CẦU
         if raw_line and raw_line.strip():
